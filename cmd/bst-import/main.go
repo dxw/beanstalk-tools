@@ -15,13 +15,12 @@ const (
 )
 
 func main() {
-	if len(os.Args) < 4 {
-		fmt.Println("Usage: bst-import hostname:11300 tubename /path/to/export.txt")
+	if len(os.Args) < 3 {
+		fmt.Println("Usage: bst-import hostname:11300 tubename")
 	}
 
 	host := os.Args[1]
 	tubeName := os.Args[2]
-	filePath := os.Args[3]
 
 	conn, err := beanstalk.Dial("tcp", host)
 	if err != nil {
@@ -31,13 +30,7 @@ func main() {
 
 	tube := &beanstalk.Tube{conn, tubeName}
 
-	file, err := os.Open(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	decoder := json.NewDecoder(file)
+	decoder := json.NewDecoder(os.Stdin)
 
 	for decoder.More() {
 		var item common.Item
