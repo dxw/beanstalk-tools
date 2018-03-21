@@ -1,11 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
+	"github.com/dxw/beanstalk-tools"
 	"github.com/kr/beanstalk"
 )
 
@@ -25,6 +27,8 @@ func main() {
 
 	tubeSet := beanstalk.NewTubeSet(conn, tubeName)
 
+	encoder := json.NewEncoder(os.Stdout)
+
 	for {
 		id, data, err := tubeSet.Reserve(1 * time.Second)
 		if e, ok := err.(beanstalk.ConnError); ok && e.Err == beanstalk.ErrTimeout {
@@ -33,8 +37,9 @@ func main() {
 			log.Fatal(err)
 		}
 
-		fmt.Println("---")
-		fmt.Println(string(data))
+		if err := encoder.Encode(&common.Item{Content: string(data)}); err != nil {
+			log.Fatal(err)
+		}
 
 		err = conn.Delete(id)
 		if err != nil {

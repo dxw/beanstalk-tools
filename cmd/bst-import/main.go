@@ -1,13 +1,12 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"strings"
 
+	"github.com/dxw/beanstalk-tools"
 	"github.com/kr/beanstalk"
 )
 
@@ -38,23 +37,15 @@ func main() {
 	}
 	defer file.Close()
 
-	fileReader := bufio.NewReader(file)
+	decoder := json.NewDecoder(file)
 
-	for {
-		line, err := fileReader.ReadString('\n')
-		if err == io.EOF {
-			break
-		} else if err != nil {
+	for decoder.More() {
+		var item common.Item
+		if err := decoder.Decode(&item); err != nil {
 			log.Fatal(err)
 		}
 
-		if line == "---\n" {
-			continue
-		}
-
-		line = strings.TrimRight(line, "\n")
-
-		_, err = tube.Put([]byte(line), defaultPriority, 0, 0)
+		_, err = tube.Put([]byte(item.Content), defaultPriority, 0, 0)
 		if err != nil {
 			log.Fatal(err)
 		}
