@@ -26,7 +26,7 @@ func main() {
 	tubeSet := beanstalk.NewTubeSet(conn, tubeName)
 
 	for {
-		_, data, err := tubeSet.Reserve(1 * time.Second)
+		id, data, err := tubeSet.Reserve(1 * time.Second)
 		if e, ok := err.(beanstalk.ConnError); ok && e.Err == beanstalk.ErrTimeout {
 			break
 		} else if err != nil {
@@ -35,5 +35,10 @@ func main() {
 
 		fmt.Println("---")
 		fmt.Println(string(data))
+
+		err = conn.Delete(id)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
