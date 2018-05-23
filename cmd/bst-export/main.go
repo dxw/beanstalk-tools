@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/dxw/beanstalk-tools"
@@ -37,7 +38,21 @@ func main() {
 			log.Fatal(err)
 		}
 
-		if err := encoder.Encode(&common.Item{Content: string(data)}); err != nil {
+		stats, err := conn.StatsJob(id)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		age, err := strconv.Atoi(stats["age"])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = encoder.Encode(&common.Item{
+			Content: string(data),
+			Age:     int64(age),
+		})
+		if err != nil {
 			log.Fatal(err)
 		}
 
