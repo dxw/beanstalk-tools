@@ -48,9 +48,13 @@ func main() {
 			log.Fatal(err)
 		}
 
+		// Subtract age (reported by beanstalkd) from the current
+		// time (reported by the OS) to get the creation time
+		creation := time.Now().Add(-time.Duration(age) * time.Second).UTC()
+
 		err = encoder.Encode(&common.Item{
-			Content: string(data),
-			Age:     int64(age),
+			Content:   string(data),
+			CreatedAt: creation,
 		})
 		if err != nil {
 			log.Fatal(err)

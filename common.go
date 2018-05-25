@@ -1,6 +1,8 @@
 package common
 
+import "time"
+
 type Item struct {
-	Content string
-	Age     int64
+	Content   string
+	CreatedAt time.Time
 }
